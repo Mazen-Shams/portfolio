@@ -26,17 +26,23 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+// Smooth scrolling for in-page section links (e.g. #about, #skills, #contact)
+document.querySelectorAll('a[href^="#"]:not([href="#"]):not(.cert-modal-btn)').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            const offsetTop = target.offsetTop - 80; // Account for fixed navbar
-            window.scrollTo({
-                top: offsetTop,
-                behavior: 'smooth'
-            });
+        const href = this.getAttribute('href');
+        if (!href || !href.startsWith('#') || href === '#') return;
+        try {
+            const target = document.querySelector(href);
+            if (target) {
+                e.preventDefault();
+                const offsetTop = target.offsetTop - 80; // Account for fixed navbar
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        } catch (err) {
+            // Not a valid selector, let default navigation proceed
         }
     });
 });
@@ -273,3 +279,145 @@ document.addEventListener('click', (e) => {
         }
     });
 });
+
+// ==========================================================================
+// Certificate Lightbox Modal Implementation
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const certModal = document.getElementById('certModal');
+    if (!certModal) return;
+
+    const modalImg = document.getElementById('certModalImg');
+    const modalTitle = document.getElementById('certModalTitle');
+    const modalOrg = document.getElementById('certModalOrg');
+    const modalDate = document.getElementById('certModalDate');
+    const modalId = document.getElementById('certModalId');
+    const modalLink = document.getElementById('certModalExternalLink');
+    const closeBtn = document.getElementById('certModalClose');
+    const dismissBtn = document.getElementById('certModalDismiss');
+    const backdrop = document.getElementById('certModalBackdrop');
+
+    function openModal(data) {
+        modalImg.src = data.img || '';
+        modalImg.alt = data.title || 'Certificate preview';
+        modalTitle.textContent = data.title || 'Certificate Preview';
+        modalOrg.textContent = data.org || '';
+        modalDate.textContent = data.date || '';
+        modalId.textContent = data.id || '';
+
+        if (data.verify) {
+            modalLink.href = data.verify;
+            modalLink.setAttribute('href', data.verify);
+            modalLink.style.display = 'inline-flex';
+            const linkText = modalLink.querySelector('span');
+            if (linkText) {
+                if (data.verify.includes('credly.com')) {
+                    linkText.textContent = 'Verify on Credly';
+                } else if (data.verify.includes('datacamp.com')) {
+                    linkText.textContent = 'Verify on DataCamp';
+                } else if (data.verify.includes('udacity.com')) {
+                    linkText.textContent = 'Verify on Udacity';
+                } else if (data.verify.includes('efset.org')) {
+                    linkText.textContent = 'Verify on EF SET';
+                } else if (data.verify.endsWith('.png') || data.verify.endsWith('.jpg') || data.verify.endsWith('.pdf')) {
+                    linkText.textContent = 'View Full Certificate';
+                } else {
+                    linkText.textContent = 'Verify Credential';
+                }
+            }
+            modalImg.style.cursor = 'pointer';
+            modalImg.title = 'Click to open verification page';
+            modalImg.onclick = () => {
+                window.open(data.verify, '_blank', 'noopener,noreferrer');
+            };
+        } else {
+            modalLink.style.display = 'none';
+            modalLink.removeAttribute('href');
+            modalImg.style.cursor = 'default';
+            modalImg.title = '';
+            modalImg.onclick = null;
+        }
+
+        certModal.classList.add('active');
+        certModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        certModal.classList.remove('active');
+        certModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            if (!certModal.classList.contains('active')) {
+                modalImg.src = '';
+            }
+        }, 250);
+    }
+
+    // Attach click listener to all certificate triggers
+    document.querySelectorAll('.cert-lightbox-trigger, [data-cert-img]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            const img = el.getAttribute('data-cert-img');
+            if (!img) return;
+
+            e.preventDefault();
+            openModal({
+                img: img,
+                title: el.getAttribute('data-cert-title') || el.querySelector('h4')?.textContent || '',
+                org: el.getAttribute('data-cert-org') || el.querySelector('.cert-org')?.textContent || '',
+                date: el.getAttribute('data-cert-date') || el.querySelector('.cert-date')?.textContent || '',
+                id: el.getAttribute('data-cert-id') || el.querySelector('.cert-id')?.textContent || '',
+                verify: el.getAttribute('data-cert-verify') || el.getAttribute('href') || ''
+            });
+        });
+    });
+
+    // Explicit click handler for modalLink to guarantee reliable external navigation
+    modalLink?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const href = modalLink.getAttribute('href');
+        if (href && href !== '#' && href !== 'javascript:void(0)' && href !== '') {
+            e.preventDefault();
+            window.open(href, '_blank', 'noopener,noreferrer');
+        }
+    });
+
+    closeBtn?.addEventListener('click', closeModal);
+    dismissBtn?.addEventListener('click', closeModal);
+    backdrop?.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && certModal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+});
+
+// ==========================================================================
+// Dynamic Age Calculation (Birthdate: January 1, 2001)
+// ==========================================================================
+function updateDynamicAge() {
+    const ageEl = document.getElementById('dynamicAge');
+    if (!ageEl) return;
+
+    const birthdateStr = ageEl.getAttribute('data-birthdate') || '2001-01-01';
+    const [birthYear, birthMonth, birthDay] = birthdateStr.split('-').map(Number);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthYear;
+    const monthDiff = (today.getMonth() + 1) - birthMonth;
+    const dayDiff = today.getDate() - birthDay;
+
+    // Adjust if birthday has not occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--;
+    }
+
+    ageEl.textContent = age;
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateDynamicAge);
+} else {
+    updateDynamicAge();
+}
