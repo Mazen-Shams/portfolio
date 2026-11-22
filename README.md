@@ -24,10 +24,16 @@ Modern, ultra-fast, responsive developer portfolio showcasing industrial smart m
 
 | Project | Domain | Tech Stack | Link |
 | :--- | :--- | :--- | :--- |
+| **SAP Spare Part AI Locator** | Edge AI & Computer Vision | RapidOCR, ONNX Runtime CPU, FastAPI, HTTPS/SSL | [GitHub Repo](https://github.com/Mazen-Shams/sap-spare-part--ai-rapidocr-onnxruntime) |
+| **Mesnac Tyre Weight Pipeline** | Industrial Automation & OPC UA | OPC UA (asyncua), ControlLogix PLCs, Kepware, SQL Server | [GitHub Repo](https://github.com/Mazen-Shams/mesnac-tyre-weight-plc-kepware-sql-pipeline) |
+| **26-Camera TCP Tracking Daemon** | Network Socket & Kernel Programming | Windows Kernel ioctl (SIO_KEEPALIVE_VALS), Zebra GigE, SQL Server | [GitHub Repo](https://github.com/Mazen-Shams/zebra-camera-tcp-tracking-database-sql-sp-pipeline) |
+| **Dashboard-as-Code & Dremio IaC** | Enterprise IaC & Lakehouse | Grafana REST API, JSON Schema Linting, Dremio Arrow, Python | [GitHub Repo](https://github.com/Mazen-Shams/dremio-db-grafana-dashboard-code-automation-suite) |
+| **PLC Quality Interlock Pipeline** | Safety Systems & Hardware Interlocks | Siemens S7 & AB PLCs, Kepware OPC, SQL Server SPs, Pneumatics | [GitHub Repo](https://github.com/Mazen-Shams/quality-interlock-pipeline--sql-kepware-plc) |
+| **REA JET Industrial Printer Suite** | Industrial Protocols & HIL Simulation | REA-PI v3.6 Protocol, Wireshark, Python Socket Daemon, HIL Mocks | [GitHub Repo](https://github.com/Mazen-Shams/Reajet-Industrial-Printer-service-suite) |
 | **Hybrid IoT Pipeline** | Industrial Automation & Real-Time IoT | Siemens S7-1200, ThingWorx, Kafka, Azure IoT Hub, Spark Streaming | [GitHub Repo](https://github.com/Mazen-Shams/Depi-Real-time-IoT-pipeline-) |
-| **Retail Batch ETL Pipeline** | Big Data & Analytics Engineering | PySpark, Docker, PostgreSQL, Apache Airflow | [GitHub Repo](https://github.com/Mazen-Shams/Building-a-Retail-Data-pipeline) |
-| **Heating Energy Management System (HEMS)** | Smart Manufacturing & Energy Analytics | FLIR Thermal Sensors, Modbus, Python, Time-Series Databases | *Industry @ Prometeon* |
-| **ASD Screening Mobile App** | Mobile ML & Healthcare | Flutter, Python, Scikit-learn, REST APIs | *Alexandria University* |
+| **Retail Batch ETL Pipeline** | Big Data & Analytics Engineering | PySpark, Docker, PostgreSQL, Snowflake, Apache Airflow | [GitHub Repo](https://github.com/Mazen-Shams/Building-a-Retail-Data-pipeline) |
+| **HEMS (Smart Asset Management)** | Smart Manufacturing & Operations | FastAPI, HTMX, Tailwind CSS, QR Dispatches, AI Orchestration | *Industry @ Prometeon* |
+| **ASD Screening Mobile App** | Mobile ML & Assistive Tech | Flutter, Python, Scikit-learn, Augmented Reality, Emotion CV | *Alexandria University* |
 
 ---
 
