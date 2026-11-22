@@ -202,81 +202,44 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Contact form submission: tries Formspree when data-endpoint is set on the form,
-// otherwise falls back to opening the user's email client via mailto:.
+// ==========================================================================
+// Interactive Direct Email Copy Handler
+// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('contact-form');
-    if (!form) return;
+    document.querySelectorAll('.copy-email-btn, .copy-email').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = btn.getAttribute('data-email') || 'mazen.shams6999@gmail.com';
+            const labelSpan = btn.querySelector('span');
+            const originalText = labelSpan ? labelSpan.textContent : btn.textContent;
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const statusEl = form.querySelector('.form-status');
-    if (submitBtn) submitBtn.disabled = true;
-    if (statusEl) statusEl.textContent = 'Sending...';
-
-        const formData = new FormData(form);
-        const payload = {
-            name: formData.get('name') || '',
-            email: formData.get('email') || '',
-            message: formData.get('message') || ''
-        };
-
-        const endpoint = form.getAttribute('data-endpoint') || '';
-        try {
-            if (endpoint) {
-                // POST to Formspree or any endpoint that accepts JSON
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    if (statusEl) statusEl.textContent = 'Message sent — thank you!';
-                    form.reset();
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(email);
                 } else {
-                    const text = await res.text();
-                    if (statusEl) statusEl.textContent = 'Sending failed. Please try again or email directly.';
-                    console.error('Form submission error:', text);
+                    const temp = document.createElement('input');
+                    temp.value = email;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
                 }
-            } else {
-                // Fallback: open mail client using mailto:
-                const subject = encodeURIComponent('Portfolio contact from ' + payload.name);
-                const body = encodeURIComponent(payload.message + '\n\nFrom: ' + payload.name + ' <' + payload.email + '>');
-                window.location.href = `mailto:mazen.shams6999@gmail.com?subject=${subject}&body=${body}`;
-                if (statusEl) statusEl.textContent = 'Opening mail client...';
-            }
-        } catch (err) {
-            console.error('Contact form error', err);
-            if (statusEl) statusEl.textContent = 'An unexpected error occurred. Try emailing directly.';
-        } finally {
-            if (submitBtn) submitBtn.disabled = false;
-            if (statusEl) setTimeout(() => { statusEl.textContent = ''; }, 5000);
-        }
-    });
-});
 
-// Copy email button handler (small feedback)
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.copy-email');
-    if (!btn) return;
-    const email = btn.getAttribute('data-email');
-    if (!email) return;
-    navigator.clipboard?.writeText(email).then(() => {
-        const orig = btn.innerHTML;
-        btn.innerHTML = 'Copied';
-        setTimeout(() => btn.innerHTML = orig, 1800);
-    }).catch(() => {
-        // fallback: select text
-        const el = document.getElementById('primary-email');
-        if (el) {
-            const range = document.createRange();
-            range.selectNodeContents(el);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
+                btn.classList.add('copied');
+                if (labelSpan) {
+                    labelSpan.textContent = 'Copied! ✓';
+                }
+
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    if (labelSpan) {
+                        labelSpan.textContent = originalText;
+                    }
+                }, 2200);
+            } catch (err) {
+                console.error('Copy failed:', err);
+            }
+        });
     });
 });
 
