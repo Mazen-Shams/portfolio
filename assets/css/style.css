@@ -985,9 +985,13 @@ section {
     flex-direction: column;
     align-items: stretch;
     width: 260px;
-    aspect-ratio: 1 / 1; /* square cards */
     padding: 0; /* inner elements handle padding */
     overflow: hidden;
+}
+
+.cert-horizontal-list .cert-thumb {
+    flex: 0 0 156px;
+    height: 156px;
 }
 
 .cert-thumb {
@@ -1007,7 +1011,7 @@ section {
 }
 
 .cert-horizontal-list .cert-info {
-    flex: 0 0 118px;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -1043,8 +1047,9 @@ section {
         flex: 0 0 215px;
         width: 215px;
     }
-    .cert-horizontal-list .cert-info {
-        flex: 0 0 108px;
+    .cert-horizontal-list .cert-thumb {
+        flex: 0 0 132px;
+        height: 132px;
     }
 }
 
