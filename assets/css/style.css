@@ -931,14 +931,22 @@ section {
     grid-template-columns: 1fr; /* force single column */
 }
 
-/* Horizontal square cards for certifications */
+/* Horizontal museum-view gallery for certifications */
 .cert-horizontal-list {
     display: flex;
     gap: 1rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.75rem;
-    scroll-snap-type: x mandatory;
+    padding: 8px 0.75rem 14px;
+    scroll-snap-type: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
+}
+
+.cert-horizontal-list::-webkit-scrollbar {
+    display: none;
 }
 
 .cert-horizontal-list .cert-card {
@@ -969,6 +977,13 @@ section {
     border-top: 1px solid rgba(255,255,255,0.02);
 }
 
+.cert-horizontal-list .cert-info {
+    flex: 0 0 118px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
 /* Make thumbnail area ready for an img element if you want to add certificate picture */
 .cert-thumb img {
     width: 100%;
@@ -994,19 +1009,13 @@ section {
     transform: scale(1.06);
 }
 
-/* Scrollbar styling */
-.cert-horizontal-list::-webkit-scrollbar {
-    height: 10px;
-}
-.cert-horizontal-list::-webkit-scrollbar-thumb {
-    background: rgba(96,165,250,0.12);
-    border-radius: 8px;
-}
-
 @media (max-width: 480px) {
     .cert-horizontal-list .cert-card {
-        flex: 0 0 200px;
-        width: 200px;
+        flex: 0 0 215px;
+        width: 215px;
+    }
+    .cert-horizontal-list .cert-info {
+        flex: 0 0 108px;
     }
 }
 
@@ -1069,31 +1078,34 @@ section {
     color: #d1d5db;
 }
 
-/* Horizontal scrollable projects on wide screens */
-@media (min-width: 900px) {
-    .projects-grid {
-        display: flex;
-        gap: 1.5rem;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 1rem;
-    }
+/* Horizontal museum-view gallery for featured engineering projects */
+.projects-grid {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 0.75rem 14px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
+}
 
+.projects-grid::-webkit-scrollbar {
+    display: none;
+}
+
+.project-card {
+    min-width: 340px;
+    flex: 0 0 340px;
+    scroll-snap-align: start;
+}
+
+@media (max-width: 480px) {
     .project-card {
-        min-width: 340px;
-        flex: 0 0 340px;
-        scroll-snap-align: start;
-    }
-
-    /* hide default scrollbar on WebKit but keep accessibility */
-    .projects-grid::-webkit-scrollbar {
-        height: 10px;
-    }
-
-    .projects-grid::-webkit-scrollbar-thumb {
-        background: rgba(96,165,250,0.15);
-        border-radius: 10px;
+        min-width: 290px;
+        flex: 0 0 290px;
     }
 }
 
@@ -1325,10 +1337,6 @@ section {
         gap: 2rem;
     }
 
-    .projects-grid {
-        grid-template-columns: 1fr;
-    }
-
     .contact-info {
         flex-direction: column;
     }
@@ -1404,6 +1412,14 @@ section {
     
     html {
         scroll-behavior: auto;
+    }
+
+    .projects-grid,
+    .cert-horizontal-list {
+        scroll-snap-type: x mandatory;
+        -webkit-mask-image: none;
+        mask-image: none;
+        scrollbar-width: thin;
     }
 }
 

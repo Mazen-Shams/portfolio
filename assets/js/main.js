@@ -64,14 +64,37 @@ const observer = new IntersectionObserver((entries) => {
 
 // Observe elements for animation
 document.addEventListener('DOMContentLoaded', () => {
-    const animatedElements = document.querySelectorAll('.project-card, .about-text, .skills');
-    
+    const animatedElements = document.querySelectorAll('.about-text, .skills');
+
     animatedElements.forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(el);
     });
+
+    // Reveal the entire projects museum strip together when scrolled into view
+    const projectsStrip = document.querySelector('.projects-grid');
+    if (projectsStrip) {
+        const projectCards = projectsStrip.querySelectorAll('.project-card');
+        projectCards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        });
+        const stripObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    projectsStrip.querySelectorAll('.project-card').forEach(card => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    });
+                    stripObserver.unobserve(projectsStrip);
+                }
+            });
+        }, observerOptions);
+        stripObserver.observe(projectsStrip);
+    }
 });
 
 // Typing effect for hero title (optional enhancement)
@@ -317,8 +340,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 250);
     }
 
-    // Attach click listener to all certificate triggers
-    document.querySelectorAll('.cert-lightbox-trigger, [data-cert-img]').forEach(el => {
+    // Attach click listener to all certificate triggers (supports both original and cloned marquee cards)
+    function bindCertTrigger(el) {
+        if (el.dataset.certBound === 'true') return;
+        el.dataset.certBound = 'true';
         el.addEventListener('click', (e) => {
             const img = el.getAttribute('data-cert-img');
             if (!img) return;
@@ -333,6 +358,129 @@ document.addEventListener('DOMContentLoaded', () => {
                 verify: el.getAttribute('data-cert-verify') || el.getAttribute('href') || ''
             });
         });
+    }
+
+    document.querySelectorAll('.cert-lightbox-trigger, [data-cert-img]').forEach(bindCertTrigger);
+
+    // ==========================================================================
+    // Seamless Museum-View Horizontal Autoscroll (Projects & Certifications)
+    // ==========================================================================
+    function initMuseumMarquee(container, { speedPxPerSec = 36, onClone = null } = {}) {
+        if (!container) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const originals = Array.from(container.children);
+        if (originals.length < 2) return;
+
+        // Clone original items once so scrolling wraps seamlessly with zero snap-back
+        const firstClone = originals[0].cloneNode(true);
+        const clones = [firstClone, ...originals.slice(1).map(el => el.cloneNode(true))];
+
+        clones.forEach(clone => {
+            clone.classList.add('marquee-clone');
+            clone.setAttribute('aria-hidden', 'true');
+            clone.setAttribute('tabindex', '-1');
+            clone.style.opacity = '1';
+            clone.style.transform = 'none';
+            clone.querySelectorAll('a, button, [tabindex]').forEach(focusable => {
+                focusable.setAttribute('tabindex', '-1');
+            });
+            container.appendChild(clone);
+            if (typeof onClone === 'function') onClone(clone);
+        });
+
+        let isHovered = false;
+        let isFocused = false;
+        let isPointerDown = false;
+        let manualPauseUntil = 0;
+        let carry = 0;
+        let lastTime = null;
+
+        function getSetWidth() {
+            return firstClone.offsetLeft - originals[0].offsetLeft;
+        }
+
+        function isPaused(now) {
+            return (
+                document.hidden ||
+                isHovered ||
+                isFocused ||
+                isPointerDown ||
+                now < manualPauseUntil ||
+                certModal.classList.contains('active')
+            );
+        }
+
+        function wrapScrollPosition() {
+            const setWidth = getSetWidth();
+            if (setWidth <= 0) return;
+            if (container.scrollLeft >= setWidth) {
+                container.scrollLeft -= setWidth;
+            } else if (container.scrollLeft <= 0 && (isPointerDown || performance.now() < manualPauseUntil)) {
+                container.scrollLeft += setWidth;
+            }
+        }
+
+        container.addEventListener('mouseenter', () => { isHovered = true; });
+        container.addEventListener('mouseleave', () => { isHovered = false; });
+        container.addEventListener('focusin', () => { isFocused = true; });
+        container.addEventListener('focusout', () => { isFocused = false; });
+        container.addEventListener('pointerdown', () => { isPointerDown = true; });
+        window.addEventListener('pointerup', () => {
+            if (isPointerDown) {
+                isPointerDown = false;
+                manualPauseUntil = performance.now() + 1200;
+            }
+        });
+        container.addEventListener('wheel', (e) => {
+            if (Math.abs(e.deltaX) > 0 || e.shiftKey) {
+                manualPauseUntil = performance.now() + 1200;
+            }
+        }, { passive: true });
+        container.addEventListener('scroll', wrapScrollPosition, { passive: true });
+
+        function tick(now) {
+            if (lastTime === null) lastTime = now;
+            const dt = Math.min((now - lastTime) / 1000, 0.05);
+            lastTime = now;
+
+            const setWidth = getSetWidth();
+            if (setWidth > container.clientWidth && !isPaused(now)) {
+                carry += speedPxPerSec * dt;
+                const wholePx = Math.floor(carry);
+                if (wholePx >= 1) {
+                    carry -= wholePx;
+                    container.scrollLeft += wholePx;
+                    if (container.scrollLeft >= setWidth) {
+                        container.scrollLeft -= setWidth;
+                    }
+                }
+            } else {
+                carry = 0;
+            }
+            requestAnimationFrame(tick);
+        }
+
+        requestAnimationFrame(tick);
+    }
+
+    initMuseumMarquee(document.querySelector('.projects-grid'), {
+        speedPxPerSec: 36,
+        onClone: (clone) => {
+            clone.querySelectorAll('.project-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const projectName = e.target.closest('.project-card')?.querySelector('h3')?.textContent;
+                    if (projectName) trackClick(e.target, `Project link clicked: ${projectName}`);
+                });
+            });
+        }
+    });
+
+    initMuseumMarquee(document.querySelector('.cert-horizontal-list'), {
+        speedPxPerSec: 32,
+        onClone: (clone) => {
+            bindCertTrigger(clone);
+        }
     });
 
     // Explicit click handler for modalLink to guarantee reliable external navigation
