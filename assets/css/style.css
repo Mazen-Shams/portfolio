@@ -939,14 +939,43 @@ section {
     -webkit-overflow-scrolling: touch;
     padding: 8px 0.75rem 14px;
     scroll-snap-type: none;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    cursor: grab;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(96, 165, 250, 0.25) transparent;
     -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
     mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
 }
 
-.cert-horizontal-list::-webkit-scrollbar {
-    display: none;
+.cert-horizontal-list::-webkit-scrollbar,
+.projects-grid::-webkit-scrollbar {
+    height: 8px;
+}
+
+.cert-horizontal-list::-webkit-scrollbar-track,
+.projects-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cert-horizontal-list::-webkit-scrollbar-thumb,
+.projects-grid::-webkit-scrollbar-thumb {
+    background: rgba(96, 165, 250, 0.22);
+    border-radius: 999px;
+}
+
+.cert-horizontal-list::-webkit-scrollbar-thumb:hover,
+.projects-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(96, 165, 250, 0.45);
+}
+
+.cert-horizontal-list.is-dragging,
+.projects-grid.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+}
+
+.cert-horizontal-list.is-dragging .cert-card,
+.projects-grid.is-dragging .project-card {
+    pointer-events: none;
 }
 
 .cert-horizontal-list .cert-card {
@@ -1086,14 +1115,11 @@ section {
     scroll-snap-type: none;
     -webkit-overflow-scrolling: touch;
     padding: 8px 0.75rem 14px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    cursor: grab;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(96, 165, 250, 0.25) transparent;
     -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
     mask-image: linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%);
-}
-
-.projects-grid::-webkit-scrollbar {
-    display: none;
 }
 
 .project-card {

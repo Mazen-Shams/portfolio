@@ -392,6 +392,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let isHovered = false;
         let isFocused = false;
         let isPointerDown = false;
+        let isMouseDragging = false;
+        let dragStartX = 0;
+        let dragStartScrollLeft = 0;
+        let didDrag = false;
         let manualPauseUntil = 0;
         let carry = 0;
         let lastTime = null;
@@ -425,13 +429,46 @@ document.addEventListener('DOMContentLoaded', () => {
         container.addEventListener('mouseleave', () => { isHovered = false; });
         container.addEventListener('focusin', () => { isFocused = true; });
         container.addEventListener('focusout', () => { isFocused = false; });
-        container.addEventListener('pointerdown', () => { isPointerDown = true; });
+        container.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
+        container.addEventListener('pointerdown', (e) => {
+            isPointerDown = true;
+            if (e.pointerType === 'mouse' && e.button === 0) {
+                isMouseDragging = true;
+                didDrag = false;
+                dragStartX = e.clientX;
+                dragStartScrollLeft = container.scrollLeft;
+            }
+        });
+        window.addEventListener('pointermove', (e) => {
+            if (!isMouseDragging) return;
+            const dx = e.clientX - dragStartX;
+            if (Math.abs(dx) > 6) {
+                didDrag = true;
+                container.classList.add('is-dragging');
+                container.scrollLeft = dragStartScrollLeft - dx;
+            }
+        });
         window.addEventListener('pointerup', () => {
+            if (isMouseDragging) {
+                isMouseDragging = false;
+                container.classList.remove('is-dragging');
+                if (didDrag) {
+                    setTimeout(() => { didDrag = false; }, 50);
+                }
+            }
             if (isPointerDown) {
                 isPointerDown = false;
                 manualPauseUntil = performance.now() + 1200;
             }
         });
+        container.addEventListener('click', (e) => {
+            if (didDrag) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
         container.addEventListener('wheel', (e) => {
             if (Math.abs(e.deltaX) > 0 || e.shiftKey) {
                 manualPauseUntil = performance.now() + 1200;
